@@ -8,23 +8,48 @@
     <script type="module">
         import { io } from 'https://cdn.socket.io/4.3.2/socket.io.esm.min.js';
 
+        const fechaActual = new Date();
+
+        // Obtener las componentes de la hora
+        const horas = fechaActual.getHours();
+        const minutos = fechaActual.getMinutes();
+        const segundos = fechaActual.getSeconds();
+
+        // Formatear la hora como una cadena
+        const horaActual = `${horas}:${minutos}:${segundos}`;
+
         const socket = io();
 
         const form = document.getElementById('form');
         const input = document.getElementById('input');
         const messages = document.getElementById('messages');
+        const audio = document.getElementById('audioReproducir');
+        let inputvalue = '';
 
-        socket.on('chat_message', (msg) => {
-            const item = `<li>${msg}</li>`;
-            messages.insertAdjacentHTML('beforeend', item);
-        });
+
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
             if (input.value) {
+                inputvalue = input.value;
                 socket.emit('chat_message', input.value);
                 input.value = '';
+            }
+        });
+
+        socket.on('chat_message', (msg) => {
+            const item = `<li>${horaActual}: ${msg}</li>`;
+            messages.insertAdjacentHTML('beforeend', item);
+            console.log({ inputvalue, msg });
+            document.body.click();
+            if (!(inputvalue === msg)) {
+                setTimeout(() => {
+                    audio.play();
+                }, 20);
+                setTimeout(() => {
+                    audio.pause();
+                }, 3000);
             }
         });
     </script>
@@ -48,6 +73,10 @@
             height: 100vh;
             padding: 36px 36px 100px 36px;
             grid-template-rows: 1fr;
+        }
+
+        .audio {
+            display: none;
         }
 
         #messages {
@@ -115,6 +144,9 @@
 
 <body>
     <section id="chat">
+        <audio id="audioReproducir" class="audio"
+            src="https://appmusica.ventas.fun/assets/audios/20231215_104239_20231214_141135_Odio_Romeo_Santos.mp3"
+            controls></audio>
         <ul id="messages"></ul>
         <form method="POST" id="form">
             <input type="text" name="message" id="input" placeholder="Type a message" autocomplete="off" />
