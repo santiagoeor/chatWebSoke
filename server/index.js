@@ -14,6 +14,13 @@ const io = new Server(server, {
 
 app.use(logger('dev'));
 app.use(cors());  // Habilitar CORS
+app.use(express.json());
+
+app.post('/ventaNueva', (req, res) => {
+    console.log(req.body);
+    io.emit('nueva_venta', req.body);
+    res.json({ mensaje: 'OK' });
+});
 
 io.on('connection', (socket) => {
     console.log('User connected');
